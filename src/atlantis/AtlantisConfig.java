@@ -46,8 +46,8 @@ public class AtlantisConfig {
     /**
      * Will modify bwapi.ini to use this map.
      */
-//    public static final String MAP = "maps/sscai/(?)*.sc?";
-    public static final String MAP = "Maps/BroodWar/umt/vultureDrive.scx";
+    public static final String MAP = "maps/sscai/(?)*.sc?";
+    //public static final String MAP = "Maps/BroodWar/umt/vultureDrive.scx";
     
     // =========================================================
     // === These are default values that can be overriden in ===
@@ -100,7 +100,9 @@ public class AtlantisConfig {
      * Helper method for using Terran race.
      */
     public static void useConfigForTerran() {
-        AtlantisConfig.DEFAULT_BUILD_ORDER = TerranBuildOrder.TERRAN_1_Base_Vultures;
+    	// Timmy currently only plays the Terran race, so if Terran is selected we will alter the bot
+    	// to use Timmy's AI setup.
+        AtlantisConfig.DEFAULT_BUILD_ORDER = TerranBuildOrder.TERRAN_1_FE;
         
         AtlantisConfig.MY_RACE = Race.Terran;
         AtlantisConfig.BASE = AUnitType.Terran_Command_Center;

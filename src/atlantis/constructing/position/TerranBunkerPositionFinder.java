@@ -13,6 +13,7 @@ import bwta.Chokepoint;
 /**
  *
  * @author Rafal Poniatowski <ravaelles@gmail.com>
+ * Edited by Edward Buckle
  */
 public class TerranBunkerPositionFinder {
 
@@ -46,7 +47,6 @@ public class TerranBunkerPositionFinder {
             }
         }
         
-        // =========================================================
         // Find position near specified place
         return APositionFinder.findStandardPosition(builder, building, nearTo, 30);
     }
@@ -55,6 +55,12 @@ public class TerranBunkerPositionFinder {
 
     private static APosition defineBunkerPosition(String locationModifier) {
         AUnit mainBase = Select.mainBase();
+        
+        // There are two possible "choke points" to locate a defensive building like this. Most bases
+        // in StarCraft have a narrow entrance that is considererd the MAIN_CHOKEPOINT. Some maps also
+        // have narrow pathways near to the main base that are excellent locations for a bunker. This
+        // is the "natural" choke point.
+        
 
         // Bunker at MAIN CHOKEPOINT
         if (locationModifier.equals(ASpecialPositionFinder.NEAR_MAIN_CHOKEPOINT)) {
@@ -66,17 +72,13 @@ public class TerranBunkerPositionFinder {
         }
 
         // Bunker at NATURAL CHOKEPOINT
-        else {
+        else if (locationModifier.equals(ASpecialPositionFinder.AT_NATURAL)){
             Chokepoint chokepointForNaturalBase = AMap.getChokepointForNaturalBase();
+            
             if (chokepointForNaturalBase != null && mainBase != null) {
                 BaseLocation naturalBase = AMap.getNaturalBaseLocation(Select.mainBase().getPosition());
                 return APosition.create(chokepointForNaturalBase.getCenter())
                         .translateTowards(naturalBase, 25);
-
-//                    System.out.println();
-//                    System.err.println(nearTo);
-//                    System.err.println("DIST TO CHOKE = " + nearTo.distanceTo(chokepointForNaturalBase.getCenter()));
-//                    System.err.println("DIST TO REGION = " + nearTo.distanceTo(nearTo.getRegion().getCenter()));
             }
         }
         

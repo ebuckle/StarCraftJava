@@ -72,16 +72,19 @@ public class AKeyboard implements NativeKeyListener {
 
             // Key "1"
             case 2: 
+            	System.out.println("No painting mode.");
                 changePaintingMode(APainter.MODE_NO_PAINTING);
                 break;
 
             // Key "2"
             case 3: 
+            	System.out.println("Partial painting mode.");
                 changePaintingMode(APainter.MODE_PARTIAL_PAINTING);
                 break;
 
             // Key "3"
             case 4: 
+            	System.out.println("Full painting mode.");
                 changePaintingMode(APainter.MODE_FULL_PAINTING);
                 break;
         }

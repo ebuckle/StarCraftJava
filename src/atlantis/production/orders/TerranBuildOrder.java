@@ -12,6 +12,7 @@ public class TerranBuildOrder extends ABuildOrder {
     public static final TerranBuildOrder TERRAN_1_FE = new TerranBuildOrder("1 Fact FE");
     public static final TerranBuildOrder TERRAN_1_Base_Vultures = new TerranBuildOrder("1 Base Vultures");
     public static final TerranBuildOrder TERRAN_Nada_2_Fact = new TerranBuildOrder("Nada 2 Fact");
+    public static final TerranBuildOrder TERRAN_Timmy = new TerranBuildOrder("Timmy");
 
     // =========================================================
     

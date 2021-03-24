@@ -5,6 +5,7 @@ import atlantis.combat.micro.AAttackEnemyUnit;
 import atlantis.combat.micro.AAvoidMeleeUnitsManager;
 import atlantis.combat.micro.ABadWeather;
 import atlantis.combat.micro.AbstractMicroManager;
+import atlantis.combat.micro.protoss.ProtossPsionicStormManager;
 import atlantis.combat.micro.terran.TerranMedic;
 import atlantis.combat.micro.terran.TerranSiegeTankManager;
 import atlantis.combat.micro.terran.TerranVultureManager;
@@ -141,6 +142,16 @@ public class ACombatUnitManager extends AbstractMicroManager {
                 return true;
             } 
         } 
+        
+    	// === Protoss ========================================
+        
+        else if (AGame.playsAsProtoss()) {
+        	
+        	// Templar
+        	if (unit.getType().equals(AUnitType.Protoss_High_Templar)) {
+        		return ProtossPsionicStormManager.useStorm(unit);
+        	}
+        }
         
         // =========================================================
         

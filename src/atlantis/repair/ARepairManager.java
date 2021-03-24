@@ -35,17 +35,12 @@ public class ARepairManager {
                 return true;
             }
             else {
-                double distanceToUnit = unitToRepair.distanceTo(repairer);
-                if (distanceToUnit > 1) {
-                    repairer.setTooltip("Go to " + unitToRepair.getShortNamePlusId());
-                    repairer.move(unitToRepair.getPosition(), UnitActions.MOVE_TO_REPAIR);
-                    return true;
-                }
-                else {
-                    repairer.setTooltip("Repaired!");
-                    removeUnitRepairer(repairer);
-                    return true;
-                }
+            	// Repairer logic was very aggressive, which did not work with Timmy's heavy mechanical based army.
+            	// Toned down the amount of repairers assigned as well as their need to "check in" on the repaired
+            	// unit before considering the target repaired.
+                repairer.setTooltip("Repaired!");
+                removeUnitRepairer(repairer);
+                return true;
             }
         }
         else {

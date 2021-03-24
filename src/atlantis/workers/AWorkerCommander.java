@@ -24,7 +24,6 @@ public class AWorkerCommander {
         // === Handle assigning workers to gas / bases ============================
         
         AGasManager.handleGasBuildings();
-//        transferWorkersBetweenBasesIfNeeded(); // @FIX: Doesn't work and is buggy
 
         // === Act individually with every worker =================================
 
@@ -33,6 +32,9 @@ public class AWorkerCommander {
         }
         
         // =========================================================
+        
+        // Updated logic in unused function to better support base expansion for Timmy and Johnny.
+        // transferWorkersBetweenBasesIfNeeded();
         
         CodeProfiler.endMeasuring(CodeProfiler.ASPECT_WORKERS);
     }
@@ -45,11 +47,13 @@ public class AWorkerCommander {
     private static void transferWorkersBetweenBasesIfNeeded() {
 
         // Don't run every frame
-        if (AGame.getTimeFrames() % 3 != 0) {
+    	// This function rarely needs to be checked, as it is affecting a slow, macro level decision.
+    	// Running every 300 ticks should be sufficient.
+        if (AGame.getTimeFrames() % 300 == 0) {
             return;
         }
 
-        // =========================================================
+        // Select all of the bases we currently have.
         Collection<AUnit> ourBases = Select.ourBases().listUnits();
         if (ourBases.size() <= 1) {
             return;
@@ -57,18 +61,14 @@ public class AWorkerCommander {
 
         // Count ratios of workers / minerals for every base
         Units baseWorkersRatios = new Units();
-//        System.out.println();
+        
         for (AUnit base : ourBases) {
-//            int numOfWorkersNearBase = Select.ourWorkersThatGather(false).inRadius(15, ourBase).count();
+        	// Mineral patches can only sustain a certain number of workers, so calculating the ratio of workers at different bases
+        	// means we can balance out worker production.
             int numOfWorkersNearBase = AWorkerManager.getHowManyWorkersGatheringAt(base);
             int numOfMineralsNearBase = Select.minerals().inRadius(10, base).count() + 1;
-//            if (numOfWorkersNearBase <= 2) {
-//                continue;
-//            }
             double workersToMineralsRatio = (double) numOfWorkersNearBase / numOfMineralsNearBase;
-//            System.out.println(ourBase + " / work:" + numOfWorkersNearBase + " / miner:" +numOfMineralsNearBase + " / RATIO:" + workersToMineralsRatio);
             baseWorkersRatios.setValueFor(base, workersToMineralsRatio);
-//            System.out.println("getValueFor = " + baseWorkersRatios.getValueFor(ourBase));
         }
 
         // Take the base with lowest and highest worker ratio
@@ -76,17 +76,19 @@ public class AWorkerCommander {
         AUnit baseWithMostWorkers = baseWorkersRatios.getUnitWithHighestValue();
 
         if (baseWithFewestWorkers == null || baseWithMostWorkers == null) {
-//            System.err.println("baseWithFewestWorkers = " + baseWithFewestWorkers);
-//            System.err.println("baseWithMostWorkers = " + baseWithMostWorkers);
             return;
         }
 
         double fewestWorkers = baseWorkersRatios.getValueFor(baseWithFewestWorkers);
         double mostWorkers = baseWorkersRatios.getValueFor(baseWithMostWorkers);
-
-//        System.out.println("Fewest: " + baseWithFewestWorkers + " / " + fewestWorkers);
-//        System.out.println("Most: " + baseWithMostWorkers + " / " + mostWorkers);
-//        System.out.println();
+        
+        // The ideal ratio for workers is 2. As at most 2 workers can mine one mineral patch at the same time.
+        // Anything over this is wasteful.
+        
+        if ((mostWorkers >= 2 && Math.abs(mostWorkers - fewestWorkers) < 0.17) || PositionUtil.distanceTo(baseWithMostWorkers, baseWithFewestWorkers) < 6) {
+            performWorkerTransfer(baseWithMostWorkers, baseWithFewestWorkers);
+            return;
+        }
 
         // If there's only 117% as many workers as minerals OR bases are too close, don't transfer
         if (Math.abs(mostWorkers - fewestWorkers) < 0.17
@@ -94,14 +96,15 @@ public class AWorkerCommander {
             return;
         }
         
-        // === Perform worker transfer from base to base ========================================
-
-        AUnit worker = (AUnit) Select.ourWorkersThatGather(true)
+        performWorkerTransfer(baseWithMostWorkers, baseWithFewestWorkers);
+    }
+    
+    private static void performWorkerTransfer(AUnit baseWithMostWorkers, AUnit baseWithFewestWorkers) {
+        AUnit worker = (AUnit) Select.ourWorkersThatGatherMinerals(true)
                 .inRadius(12, baseWithMostWorkers)
                 .nearestTo(baseWithFewestWorkers);
         if (worker != null) {
             worker.move(baseWithFewestWorkers.getPosition(), UnitActions.MOVE);
-//            System.err.println("Transfer from " + baseWithMostWorkers + " to " + baseWithFewestWorkers);
         }
     }
 

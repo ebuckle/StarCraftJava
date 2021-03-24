@@ -815,6 +815,22 @@ public class Select<T> {
         }
         return selectedUnits;
     }
+    
+    /**
+     * Selects our workers (that is of type Terran SCV or Zerg Drone or Protoss Probe) that are only
+     * gathering minerals.
+     */
+    public static Select<AUnit> ourWorkersThatGatherMinerals(boolean onlyNotCarryingAnything) {
+        Select<AUnit> selectedUnits = Select.our();
+        for (Iterator<AUnit> unitIter = selectedUnits.list().iterator(); unitIter.hasNext();) {
+            AUnit unit = unitIter.next();
+            if (!unit.isWorker() || unit.isGatheringGas() || !unit.isGatheringMinerals()
+                    || (onlyNotCarryingAnything && (unit.isCarryingGas() || unit.isCarryingMinerals()))) {
+                unitIter.remove();
+            }
+        }
+        return selectedUnits;
+    }
 
     /**
      * Selects our workers that are free to construct building or repair a unit. That means they mustn't
@@ -826,7 +842,7 @@ public class Select<T> {
         for (Iterator<AUnit> unitIter = selectedUnits.list().iterator(); unitIter.hasNext();) {
             AUnit unit = unitIter.next();
             if (unit.isConstructing() || unit.isRepairing() || AConstructionManager.isBuilder(unit)
-                    || AScoutManager.isScout(unit) || unit.isRepairerOfAnyKind()) {
+                    || AScoutManager.isScout(unit) || unit.isRepairerOfAnyKind() || unit.isCarryingMinerals() || unit.isCarryingGas()) {
                 unitIter.remove();
             }
         }

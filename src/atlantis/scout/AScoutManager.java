@@ -41,6 +41,7 @@ public class AScoutManager {
     private static APosition scoutingAroundBaseLastPolygonPoint = null;
     private static boolean scoutingAroundBaseWasInterrupted = false;
     private static boolean scoutingAroundBaseDirectionClockwise = true;
+    private static boolean stopScouting = false;
 
     // =========================================================
     
@@ -73,13 +74,11 @@ public class AScoutManager {
         else {
             for (AUnit scout : scouts) {
                 if (scout.isAlive()) {
-                    handleScoutEnemyBase(scout);
+                    if (!handleScoutEnemyBase(scout)) {
+                        scoutForTheNextBase(scout);
+                    }
                 }
             }
-
-//            for (AUnit scout : scouts) {
-//                scoutForTheNextBase(scout);
-//            }
         }
         
         // =========================================================
@@ -149,6 +148,23 @@ public class AScoutManager {
             scoutingAroundBaseWasInterrupted = true;
             return true;
         }
+        
+        AUnitType enemyWorkers;
+        
+        if(AGame.isEnemyProtoss()) {
+        	enemyWorkers = AUnitType.Zerg_Drone;
+        } else if (AGame.isEnemyProtoss()) {
+        	enemyWorkers = AUnitType.Protoss_Probe;
+        } else {
+        	enemyWorkers = AUnitType.Terran_SCV;
+        }
+        
+        // If we are scouting around the enemy base and we manage to get in range of the enemy workers,
+        // we may as well harass and attack them to slow down our opponent.
+        if (Select.enemy().ofType(enemyWorkers).inRadius(5, scout).count() > 0) {
+        	scout.attackUnit(Select.enemy().ofType(enemyWorkers).nearestTo(scout));
+        	return true;
+        }
 
         // === Remain at the enemy base if it's known ==============
         APosition enemyBase = AEnemyUnits.getEnemyBase();
@@ -176,7 +192,6 @@ public class AScoutManager {
      * If we have no scout unit assigned, make one of our units a scout.
      */
     private static void assignScoutIfNeeded() {
-        
         // === Remove dead scouts ========================================
         
         for (Iterator<AUnit> iterator = scouts.iterator(); iterator.hasNext();) {
@@ -189,6 +204,18 @@ public class AScoutManager {
         
         // =========================================================
 
+        // We don't need to continue assigning scouts if the main enemy base has been discovered,
+        // updating the logic found in the original bot to stop it from endlessly throwing scouts
+        // at the enemy.
+        
+        if (stopScouting == true) {
+        	// This may need updating in order to account for scouts being killed before they can 
+        	// discover the main base location. 
+        	// Having performed extensive testing of game starting scenarios, returning at this
+        	// point seems to be the most strategically sound decision.
+        	return;
+        }
+        
         // ZERG case
         if (AGame.playsAsZerg()) {
 
@@ -197,9 +224,12 @@ public class AScoutManager {
                 if (AGame.getTimeSeconds() < 500) {
                     if (scouts.isEmpty()) {
                         for (AUnit worker : Select.ourWorkers().list()) {
-                            if (!worker.isBuilder()) {
+                        	// Update to worker selection logic for scouting. We do not want to choose a worker to scout
+                        	// that is currently carrying resources as this will slow down our economy.
+                            if (!worker.isBuilder() && !worker.isCarryingGas() && !worker.isCarryingMinerals()) {
                                 System.err.println(worker.getID());
                                 scouts.add(worker);
+                                stopScouting = true;
                                 break;
                             }
                         }
@@ -213,7 +243,15 @@ public class AScoutManager {
         } // =========================================================
         // TERRAN + PRTOSSS
         else if (scouts.isEmpty() && Select.ourWorkers().count() >= AtlantisConfig.SCOUT_IS_NTH_WORKER) {
-            scouts.add(Select.ourWorkers().first());
+            for (AUnit worker : Select.ourWorkers().list()) {
+            	// Update to worker selection logic for scouting. We do not want to choose a worker to scout
+            	// that is currently carrying resources as this will slow down our economy.
+                if (!worker.isBuilder() && !worker.isCarryingGas() && !worker.isCarryingMinerals()) {
+                    scouts.add(worker);
+                    stopScouting = true;
+                    break;
+                }
+            }
         }
     }
 

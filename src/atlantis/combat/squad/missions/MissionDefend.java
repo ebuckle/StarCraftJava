@@ -4,9 +4,12 @@ import atlantis.AGame;
 import atlantis.information.AMap;
 import atlantis.position.APosition;
 import atlantis.units.AUnit;
+import atlantis.units.AUnitType;
 import atlantis.units.Select;
 import atlantis.units.actions.UnitActions;
+import bwapi.Color;
 import bwta.Chokepoint;
+import atlantis.debug.APainter;
 
 public class MissionDefend extends Mission {
     
@@ -33,14 +36,14 @@ public class MissionDefend extends Mission {
         // === Load infantry into bunkers ==========================
         
         if (TerranInfantryManager.tryLoadingInfantryIntoBunkerIfPossible(unit)) {
-            unit.setTooltip("GTFInto bunker!");
+            unit.setTooltip("Get into bunker!");
             return true;
         }
         
         // =========================================================
         
         APosition focusPoint = getFocusPoint();
-//        APainter.paintLine(unit, focusPoint, Color.Purple);
+        APainter.paintLine(unit, focusPoint, Color.Purple);
         
         if (focusPoint == null) {
             System.err.println("Couldn't define choke point.");
@@ -92,7 +95,7 @@ public class MissionDefend extends Mission {
         // Unit is far from choke point
         else {
             unit.setTooltip("Positioning");
-            if (unit.distanceTo(focusPoint) > 3) {
+            if (unit.distanceTo(focusPoint) > 10) {
                 unit.move(focusPoint, UnitActions.MOVE);
                 return true;
             }
@@ -201,7 +204,7 @@ public class MissionDefend extends Mission {
         if (AGame.isUmtMode()) {
             return null;
         }
-        
+        /*
         // === Focus enemy attacking the main base =================
         
         AUnit mainBase = Select.mainBase();
@@ -211,20 +214,33 @@ public class MissionDefend extends Mission {
                 return nearEnemy.getPosition();
             }
         }
+        */
+        
+        // For Timmy, we want to make sure that his focus point for defending is at the same location 
+        // as his defensive structures.
+        
+        if (AGame.playsAsTerran()) {
+        	AUnit bunker = Select.ourBuildings().ofType(AUnitType.Terran_Bunker).first();
+        	
+        	if (bunker != null) {
+            	return APosition.create(bunker.getPosition());
+        	}
+        }
+        
 
         // === Return position near the choke point ================
         
-//        if (Select.ourBases().count() <= 1) {
-//            return APosition.create(AtlantisMap.getChokepointForMainBase().getCenter());
-//        }
-//        else {
+        if (Select.ourBases().count() <= 1) {
+            return APosition.create(AMap.getChokepointForMainBase().getCenter());
+        } else {
         Chokepoint chokepointForNaturalBase = AMap.getChokepointForNaturalBase();
-        if (chokepointForNaturalBase != null) {
-            return APosition.create(chokepointForNaturalBase.getCenter());
+	        if (chokepointForNaturalBase != null) {
+	            return APosition.create(chokepointForNaturalBase.getCenter());
+	        } else {
+	            return null;
+	        }
         }
-        else {
-            return null;
-        }
+
     }
     
     // =========================================================

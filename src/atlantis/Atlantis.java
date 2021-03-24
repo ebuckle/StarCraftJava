@@ -117,8 +117,8 @@ public class Atlantis implements BWEventListener {
         
         bwapi.setLocalSpeed(AtlantisConfig.GAME_SPEED); // Change in-game speed (0 - fastest, 20 - normal)
 //        bwapi.setFrameSkip(2); // Number of GUI frames to skip
-//        bwapi.setGUI(false); // Turn off GUI - will speed up game considerably
-        bwapi.enableFlag(1);	// Enable user input - without it you can't control units with mouse
+        bwapi.setGUI(true); // Turn off GUI - will speed up game considerably
+        bwapi.enableFlag(0);	// Enable user input - without it you can't control units with mouse
 
         // =========================================================
         // Set production strategy (build orders) to use. It can be always changed dynamically.

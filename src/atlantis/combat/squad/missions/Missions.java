@@ -65,7 +65,7 @@ public class Missions {
         } // =========================================================
         // We're PROTOSS
         else if (AGame.playsAsProtoss()) {
-            return 2;
+            return 4;
         } // =========================================================
         // We're ZERG
         else {
@@ -78,11 +78,12 @@ public class Missions {
         // === Terran ========================================
         
         if (AGame.playsAsTerran()) {
-            if (Select.ourOfType(AUnitType.Terran_Vulture).count() > 0) {
-                return true;
-            }
-            if (Select.ourTanks().count() < 4) {
+            // Updating this number to better reflect Timmy's preference for slow, flashy wins.
+            // Timmy does not want to attack until he has a big army of tanks to use.
+            if (Select.ourTanks().count() < 8) {
                 return false;
+            } else {
+            	return true;
             }
         }
         

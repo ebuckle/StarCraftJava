@@ -88,6 +88,10 @@ public class AWorkerManager {
         boolean isGasBuilding = target.getType().isGasBuilding();
         boolean isBase = target.isBase();
         int total = 0;
+        
+        if (!isGasBuilding && !isBase) {
+        	return total;
+        }
 
         for (AUnit worker : Select.ourWorkers().listUnits()) {
             if (isWorkerAssignedToBuilding(worker, target)) {

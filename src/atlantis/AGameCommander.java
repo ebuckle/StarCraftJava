@@ -35,13 +35,14 @@ public class AGameCommander {
         AStrategyCommander.update();
         AProductionCommander.update();
         AWorkerCommander.update();
-        ACombatCommander.update();
         AScoutManager.update();
+        ACombatCommander.update();
 
         // === Terran only ==================================================
 
         if (AGame.playsAsTerran()) {
-            TerranFlyingBuildingManager.update();
+        	// We have no real use for flying buildings in the games we will be playing
+            // TerranFlyingBuildingManager.update();
             ARepairCommander.update();
         }
 

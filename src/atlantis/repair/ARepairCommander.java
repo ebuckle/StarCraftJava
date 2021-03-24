@@ -18,9 +18,13 @@ import bwta.Chokepoint;
 public class ARepairCommander {
 
     public static void update() {
+    	// Commenting out constant bunker repairers as testing has shown it is too impactful
+    	// on resource generation to be worthwhile.
+    	/*
         if (AGame.getTimeFrames() % 15 == 0) {
             assignConstantBunkerRepairersIfNeeded();
         }
+        */
 
         if (AGame.getTimeFrames() % 15 == 0) {
             assignUnitRepairersToWoundedUnits();
